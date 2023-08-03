@@ -1,8 +1,8 @@
 import { renderHeaderComponent } from "./header-component.js";
-import { uploadImage } from "../api.js";
+import { renderUploadImageComponent } from "./upload-image-component.js";
 
 export function renderAddPostPageComponent({ appEl, onAddPostClick }) {
-  let img = "";
+  let imageUrl = "";
 
   const render = () => {
     // TODO: Реализовать страницу добавления поста
@@ -12,25 +12,15 @@ export function renderAddPostPageComponent({ appEl, onAddPostClick }) {
     <div class="form">
       <h3 class="form-title">Добавить пост</h3>
       <div class="form-inputs">
-        <div>
-        ${img ? `  <div class="file-upload-image-conrainer">  
-          <img class="file-upload-image" src="${img}">    
-               <button class="file-upload-remove-button button">Заменить фото</button>      
-                  </div>` :
-        `   
-            <label class="file-upload-label secondary-button">
-                <input
-                  type="file"
-                  class="file-upload-input"
-                  style="display:none"
-                />
-                Выберите фото
-            </label> ` } 
-        </div>
-        <label >
-        <p>Опишите фотографию:</p>
-            <textarea class="input textarea" rows="4"></textarea>
-        </label>
+      <div class="upload-image-container">
+      <div class="upload=image">
+      <div class="upload-image-container"></div>
+      </div>
+    </div>
+    <label for="">
+      Опишите фотографию:
+      <textarea class="input textarea" rows="4"></textarea>
+    </label>
       <button class="button" id="add-button">Добавить</button>
       </div>
         </div> 
@@ -38,58 +28,32 @@ export function renderAddPostPageComponent({ appEl, onAddPostClick }) {
 
     appEl.innerHTML = appHtml;
 
-
-
     renderHeaderComponent({
       element: document.querySelector(".header-container"),
     });
 
-    if (img) {
-      const fileUploadImageContainer = document.querySelector(".file-upload-image-conrainer");
-      fileUploadImageContainer.innerHTML = `
-          <img class="file-upload-image" src="${img}">
-          <button class="file-upload-remove-button button">Заменить фото</button>
-        `;
-      const removeButton = document.querySelector(".file-upload-remove-button");
-      removeButton.addEventListener("click", () => {
-        img = "";
-        render();
-      });
-    } else {
-      const fileUploadLabel = document.querySelector(".file-upload-label");
-      fileUploadLabel.innerHTML = `
-          <input type="file" class="file-upload-input" style="display:none" />
-          Выберите фото
-        `;
-      const inputFile = document.querySelector(".file-upload-input");
-      inputFile.addEventListener("change", () => {
-        const file = inputFile.files[0];
-        if (file) {
-          const inputFile = document.querySelector(".file-upload-label");
-          inputFile.setAttribute("disabled", !0);
-          inputFile.textContent = "Загружаю файл...";
-          uploadImage({ file })
-            .then(({ fileUrl }) => {
-              img = fileUrl;
-              render();
-            })
-            .catch((error) => {
-              console.error("Ошибка загрузки файла:", error);
-            });
-        };
-      });
-    };
+    const fileUploadLabel = document.querySelector(".upload-image-container");
 
-    document.getElementById("add-button").addEventListener("click", () => {
-      const description = document.querySelector(".input.textarea").value;
-      render();
+    if (fileUploadLabel) {
+      renderUploadImageComponent({
+        element: appEl.querySelector(".upload-image-container"),
+        onImageUrlChange(newImageUrl) {
+          imageUrl = newImageUrl;
+          console.log(newImageUrl);
+        },
+      });
+    }
+
+    const descriptionInput = document.querySelector(".input.textarea");
+    const addButton = document.getElementById("add-button");
+    
+    addButton.addEventListener("click", () => {
+      const description = descriptionInput.value;
       onAddPostClick({
         description,
-        imageUrl: img,
+        imageUrl: imageUrl,
       });
-
     });
-
   };
 
   render();
