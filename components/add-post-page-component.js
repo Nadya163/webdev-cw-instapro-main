@@ -1,7 +1,8 @@
+import { addPost } from "../api.js";
 import { renderHeaderComponent } from "./header-component.js";
 import { renderUploadImageComponent } from "./upload-image-component.js";
 
-export function renderAddPostPageComponent({ appEl, onAddPostClick }) {
+export function renderAddPostPageComponent({ appEl, token, onAddPostClick }) {
   let imageUrl = "";
 
   const render = () => {
@@ -44,14 +45,19 @@ export function renderAddPostPageComponent({ appEl, onAddPostClick }) {
       });
     }
 
-    const descriptionInput = document.querySelector(".input.textarea");
     const addButton = document.getElementById("add-button");
     
     addButton.addEventListener("click", () => {
-      const description = descriptionInput.value;
+      const description = document.querySelector(".textarea").value;
+      console.log(description);
+      addPost({
+        description,
+        imageUrl,
+        token
+      }),
       onAddPostClick({
         description,
-        imageUrl: imageUrl,
+        imageUrl
       });
     });
   };
