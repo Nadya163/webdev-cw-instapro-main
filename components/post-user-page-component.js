@@ -1,25 +1,9 @@
 import { LOADING_PAGE, USER_POSTS_PAGE } from "../routes.js";
 import { renderHeaderComponent } from "./header-component.js";
-import { posts, goToPage } from "../index.js";
+import { posts } from "../index.js";
 
-export function renderPostsPageComponent({ appEl }) {
-  // TODO: реализовать рендер постов из api
-  console.log("Актуальный список постов:", posts);
+export function renderUserPostsPageComponent({ appEl }) {
 
-  /**
-   * TODO: чтобы отформатировать дату создания поста в виде "19 минут назад"
-   * можно использовать https://date-fns.org/v2.29.3/docs/formatDistanceToNow
-   */
-
-    console.log(posts.length)
-    if (posts.length === 0) {
-    const postHtml = `<div class="page-container">
-    <div class="header-container"></div>
-    </div>
-    `;
-    appEl.innerHTML = postHtml;
-    console.log("работаю");
-  } else {
   const appHtml = posts.map((post) => {
       return `
       <div class="page-container">
@@ -58,20 +42,8 @@ export function renderPostsPageComponent({ appEl }) {
 
     appEl.innerHTML = appHtml;
     console.log(appEl.innerHTML);
-  }
 
-  renderHeaderComponent({
-    element: document.querySelector(".header-container"),
-  });
-
-  for (let userEl of document.querySelectorAll(".post-header")) {
-    userEl.addEventListener("click", () => {
-      console.log('post');
-      goToPage(LOADING_PAGE);
-      goToPage(USER_POSTS_PAGE, {
-        userId: userEl.dataset.userId,
+    renderHeaderComponent({
+        element: document.querySelector(".header-container"),
       });
-    });
-  }
 }
-

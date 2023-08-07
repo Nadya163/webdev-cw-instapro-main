@@ -29,7 +29,7 @@ https::https://github.com/Nadya163/webdev-cw-instapro-main/pull/1
 8 часов
 
 Реализовать страницу с постами конкретного юзера:
- часов
+2 часов
 
 
 YYYY часов

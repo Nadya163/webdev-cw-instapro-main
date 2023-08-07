@@ -14,7 +14,7 @@ export function renderAddPostPageComponent({ appEl, token, onAddPostClick }) {
       <h3 class="form-title">Добавить пост</h3>
       <div class="form-inputs">
       <div class="upload-image-container">
-      <div class="upload=image">
+      <div class="upload-image">
       <div class="upload-image-container"></div>
       </div>
     </div>
@@ -50,6 +50,18 @@ export function renderAddPostPageComponent({ appEl, token, onAddPostClick }) {
     addButton.addEventListener("click", () => {
       const description = document.querySelector(".textarea").value;
       console.log(description);
+
+      
+      if(description === '') {
+        alert('Не заполнено описание фото');
+        return;
+      };
+
+      if (!imageUrl) {
+        alert('Не добавлена картинка');
+        return;
+      }
+
       addPost({
         description,
         imageUrl,
@@ -59,6 +71,7 @@ export function renderAddPostPageComponent({ appEl, token, onAddPostClick }) {
         description,
         imageUrl
       });
+
     });
   };
 
