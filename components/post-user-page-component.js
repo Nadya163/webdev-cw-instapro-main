@@ -1,4 +1,3 @@
-import { LOADING_PAGE, USER_POSTS_PAGE } from "../routes.js";
 import { renderHeaderComponent } from "./header-component.js";
 import { posts } from "../index.js";
 
@@ -6,7 +5,6 @@ export function renderUserPostsPageComponent({ appEl }) {
 
   const appHtml = posts.map((post) => {
       return `
-      <div class="page-container">
       <div class="page-container">
     <div class="header-container"></div>
     </div>
@@ -46,4 +44,37 @@ export function renderUserPostsPageComponent({ appEl }) {
     renderHeaderComponent({
         element: document.querySelector(".header-container"),
       });
+
+      for (let likeButton of document.querySelectorAll(".like-button")) {
+        likeButton.addEventListener("click", () => {
+          const id = likeButton.dataset.postId;
+      
+          if (likeButton.dataset.isLiked === "false") {
+            likePost({ id, token })
+              .then(() => {
+                // Обновляем количество лайков без перезагрузки страницы
+                const postLikesText = likeButton.closest(".post-likes").querySelector(".post-likes-text strong");
+                const currentLikesCount = parseInt(postLikesText.innerText);
+                postLikesText.innerText = currentLikesCount + 1;
+              
+                // Меняем состояние кнопки лайка
+                likeButton.dataset.isLiked = "true";
+                likeButton.querySelector("img").src = "./assets/images/like-active.svg";
+              });
+          };
+          if (likeButton.dataset.isLiked === "true") {
+            dislikePost({ id, token })
+              .then(() => {
+                // Обновляем количество лайков без перезагрузки страницы
+                const postLikesText = likeButton.closest(".post-likes").querySelector(".post-likes-text strong");
+                const currentLikesCount = parseInt(postLikesText.innerText);
+                postLikesText.innerText = currentLikesCount - 1;
+              
+                // Меняем состояние кнопки лайка
+                likeButton.dataset.isLiked = "false";
+                likeButton.querySelector("img").src = "./assets/images/like-not-active.svg";
+              });
+          };
+        });
+      }
 }

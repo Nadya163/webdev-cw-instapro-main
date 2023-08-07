@@ -1,8 +1,9 @@
 import { LOADING_PAGE, USER_POSTS_PAGE } from "../routes.js";
 import { renderHeaderComponent } from "./header-component.js";
 import { posts, goToPage } from "../index.js";
+import { likePost, dislikePost } from "../api.js";
 
-export function renderPostsPageComponent({ appEl }) {
+export function renderPostsPageComponent({ appEl, token }) {
   // TODO: реализовать рендер постов из api
   console.log("Актуальный список постов:", posts);
 
@@ -11,7 +12,6 @@ export function renderPostsPageComponent({ appEl }) {
    * можно использовать https://date-fns.org/v2.29.3/docs/formatDistanceToNow
    */
 
-    console.log(posts.length)
     if (posts.length === 0) {
     const postHtml = `<div class="page-container">
     <div class="header-container"></div>
@@ -22,7 +22,6 @@ export function renderPostsPageComponent({ appEl }) {
   } else {
   const appHtml = posts.map((post) => {
       return `
-      <div class="page-container">
       <div class="page-container">
     <div class="header-container"></div>
     </div>
@@ -36,7 +35,7 @@ export function renderPostsPageComponent({ appEl }) {
           <img class="post-image" src="${post.imageUrl}">
         </div>
         <div class="post-likes">
-          <button data-post-id="${post.id}" class="like-button">
+          <button data-post-id="${post.id}" data-is-liked="${post.isLiked}" class="like-button">
             <img src="./assets/images/like-active.svg">
           </button>
           <p class="post-likes-text">
@@ -73,5 +72,39 @@ export function renderPostsPageComponent({ appEl }) {
       });
     });
   }
+
+  for (let likeButton of document.querySelectorAll(".like-button")) {
+    likeButton.addEventListener("click", () => {
+      const id = likeButton.dataset.postId;
+  
+      if (likeButton.dataset.isLiked === "false") {
+        likePost({ id, token })
+          .then(() => {
+            // Обновляем количество лайков без перезагрузки страницы
+            const postLikesText = likeButton.closest(".post-likes").querySelector(".post-likes-text strong");
+            const currentLikesCount = parseInt(postLikesText.innerText);
+            postLikesText.innerText = currentLikesCount + 1;
+          
+            // Меняем состояние кнопки лайка
+            likeButton.dataset.isLiked = "true";
+            likeButton.querySelector("img").src = "./assets/images/like-active.svg";
+          });
+      };
+      if (likeButton.dataset.isLiked === "true") {
+        dislikePost({ id, token })
+          .then(() => {
+            // Обновляем количество лайков без перезагрузки страницы
+            const postLikesText = likeButton.closest(".post-likes").querySelector(".post-likes-text strong");
+            const currentLikesCount = parseInt(postLikesText.innerText);
+            postLikesText.innerText = currentLikesCount - 1;
+          
+            // Меняем состояние кнопки лайка
+            likeButton.dataset.isLiked = "false";
+            likeButton.querySelector("img").src = "./assets/images/like-not-active.svg";
+          });
+      };
+    });
+  }
+
 }
 
