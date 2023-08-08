@@ -46,7 +46,9 @@ export function addPost({ description, imageUrl, token }) {
       Authorization: token,
     },
     body: JSON.stringify({
-      description,
+      description: description
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;'),
       imageUrl,
     }),
   })
@@ -65,8 +67,7 @@ export function likePost({ id, token }) {
     headers: {
       Authorization: token,
     },
-    bode: JSON.stringify({
-      isLiked: true
+    body: JSON.stringify({
     })
   })
     .then((response) => {
@@ -77,9 +78,6 @@ export function likePost({ id, token }) {
         throw new Error("Ошибка сервера");
       }
       return response.json();
-    })
-    .then((data) => {
-      return data.likes;
     });
 }
 
@@ -90,8 +88,7 @@ export function dislikePost({ id, token }) {
     headers: {
       Authorization: token,
     },
-    bode: JSON.stringify({
-      isLiked: false
+    body: JSON.stringify({
     })
   })
     .then((response) => {
@@ -102,9 +99,6 @@ export function dislikePost({ id, token }) {
         throw new Error("Ошибка сервера");
       }
       return response.json();
-    })
-    .then((data) => {
-      return data.likes;
     });
 }
 
@@ -113,9 +107,15 @@ export function registerUser({ login, password, name, imageUrl }) {
   return fetch(baseHost + "/api/user", {
     method: "POST",
     body: JSON.stringify({
-      login,
-      password,
-      name,
+      login: login
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;'),
+      password: password
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;'),
+      name: name
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;'),
       imageUrl,
     }),
   }).then((response) => {
@@ -130,8 +130,12 @@ export function loginUser({ login, password }) {
   return fetch(baseHost + "/api/user/login", {
     method: "POST",
     body: JSON.stringify({
-      login,
-      password,
+      login: login
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;'),
+      password: password
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;'),
     }),
   }).then((response) => {
     if (response.status === 400) {

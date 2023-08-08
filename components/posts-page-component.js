@@ -1,7 +1,9 @@
-import { LOADING_PAGE, USER_POSTS_PAGE } from "../routes.js";
+import { LOADING_PAGE, POSTS_PAGE, USER_POSTS_PAGE } from "../routes.js";
 import { renderHeaderComponent } from "./header-component.js";
 import { posts, goToPage } from "../index.js";
 import { likePost, dislikePost } from "../api.js";
+import { formatDistanceToNow } from "date-fns";
+import { ru } from "date-fns/locale";
 
 export function renderPostsPageComponent({ appEl, token }) {
   // TODO: реализовать рендер постов из api
@@ -12,7 +14,7 @@ export function renderPostsPageComponent({ appEl, token }) {
    * можно использовать https://date-fns.org/v2.29.3/docs/formatDistanceToNow
    */
 
-    if (posts.length === 0) {
+  if (posts.length === 0) {
     const postHtml = `<div class="page-container">
     <div class="header-container"></div>
     </div>
@@ -20,12 +22,9 @@ export function renderPostsPageComponent({ appEl, token }) {
     appEl.innerHTML = postHtml;
     console.log("работаю");
   } else {
-  const appHtml = posts.map((post) => {
+    const postsHtml = posts.map((post) => {
+      const timeAgo = formatDistanceToNow(new Date(post.createdAt), { locale: ru, addSuffix: true });
       return `
-      <div class="page-container">
-    <div class="header-container"></div>
-    </div>
-        <ul class="posts">
         <li class="post">
         <div class="post-header" data-user-id="${post.user.id}">
             <img src="${post.user.imageUrl}" class="post-header__user-image">
@@ -36,10 +35,10 @@ export function renderPostsPageComponent({ appEl, token }) {
         </div>
         <div class="post-likes">
           <button data-post-id="${post.id}" data-is-liked="${post.isLiked}" class="like-button">
-            <img src="./assets/images/like-active.svg">
+          <img src="${post.isLiked ? './assets/images/like-active.svg' : './assets/images/like-not-active.svg'}">
           </button>
           <p class="post-likes-text">
-             Нравится: <strong>${post.likes.length}</strong>
+          Нравится: ${post.likes.length < 2 ? `<strong>${0 === post.likes.length ? "0" : post.likes.map(({ name }) => name).join(", ")}</strong>` : `<strong>${post.likes[Math.floor(Math.random() * post.likes.length)].name}</strong> и <strong>еще ${(post.likes.length - 1).toString()}</strong>`}
           </p>
         </div>
         <p class="post-text">
@@ -47,14 +46,18 @@ export function renderPostsPageComponent({ appEl, token }) {
           ${post.description}
         </p>
         <p class="post-date">
-        ${post.createdAt}
+        ${timeAgo}
          </p>
-      </li>
-        </ul>
-      </div>`;
+      </li>`;
     })
-    .join("");
+      .join("");
 
+    const appHtml = `
+    <div class="page-container">
+      <div class="header-container"></div>
+      <ul class="posts">${postsHtml}</ul>
+        </div>`
+        
     appEl.innerHTML = appHtml;
     console.log(appEl.innerHTML);
   }
@@ -73,38 +76,41 @@ export function renderPostsPageComponent({ appEl, token }) {
     });
   }
 
+  if (!token) {
+    for (let likeButton of document.querySelectorAll(".like-button")) {
+      likeButton.addEventListener("click", () => {
+        alert("Что бы поставить лайк авторизуйтесь");
+      });
+    }
+    return;
+  }
+
   for (let likeButton of document.querySelectorAll(".like-button")) {
     likeButton.addEventListener("click", () => {
       const id = likeButton.dataset.postId;
-  
+
       if (likeButton.dataset.isLiked === "false") {
         likePost({ id, token })
-          .then(() => {
-            // Обновляем количество лайков без перезагрузки страницы
-            const postLikesText = likeButton.closest(".post-likes").querySelector(".post-likes-text strong");
-            const currentLikesCount = parseInt(postLikesText.innerText);
-            postLikesText.innerText = currentLikesCount + 1;
-          
-            // Меняем состояние кнопки лайка
-            likeButton.dataset.isLiked = "true";
-            likeButton.querySelector("img").src = "./assets/images/like-active.svg";
-          });
+          .then((posts => {
+            posts[token] = {
+              likes: id.likes,
+              isLiked: true
+            }
+            goToPage(POSTS_PAGE);
+          }
+          ))
       };
       if (likeButton.dataset.isLiked === "true") {
         dislikePost({ id, token })
-          .then(() => {
-            // Обновляем количество лайков без перезагрузки страницы
-            const postLikesText = likeButton.closest(".post-likes").querySelector(".post-likes-text strong");
-            const currentLikesCount = parseInt(postLikesText.innerText);
-            postLikesText.innerText = currentLikesCount - 1;
-          
-            // Меняем состояние кнопки лайка
-            likeButton.dataset.isLiked = "false";
-            likeButton.querySelector("img").src = "./assets/images/like-not-active.svg";
-          });
-      };
+          .then((posts => {
+            posts[token] = {
+              likes: id.likes,
+              isLiked: false
+            }
+            goToPage(POSTS_PAGE);
+          }
+          ))
+      }
     });
   }
-
 }
-

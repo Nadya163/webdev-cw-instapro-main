@@ -9,6 +9,7 @@ import {
   USER_POSTS_PAGE,
 } from "./routes.js";
 import { renderPostsPageComponent } from "./components/posts-page-component.js";
+import { renderUserPostsPageComponent } from "./components/post-user-page-component.js";
 import { renderLoadingPageComponent } from "./components/loading-page-component.js";
 import {
   getUserFromLocalStorage,
@@ -29,7 +30,7 @@ export const logout = () => {
   user = null;
   removeUserFromLocalStorage();
   goToPage(POSTS_PAGE);
-};
+}; 
 
 /**
  * Включает страницу приложения
@@ -141,7 +142,7 @@ if (page === POSTS_PAGE) {
 
 if (page === USER_POSTS_PAGE) {
   //  TODO: реализовать страницу фотографию пользвателя
-  return renderPostsPageComponent({
+  return renderUserPostsPageComponent({
     appEl,
     token: getToken()
   })
