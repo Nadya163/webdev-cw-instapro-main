@@ -71,6 +71,8 @@ export function renderAddPostPageComponent({ appEl, token, onAddPostClick }) {
         description,
         imageUrl
       });
+      
+      render();
 
     });
   };
