@@ -22,9 +22,7 @@ export function renderUploadImageComponent({ element, onImageUrlChange }) {
                   style="display:none"
                 />
                 Выберите фото
-            </label>
-          
-      `
+            </label>`
       }
   </div>
 `;

@@ -1,4 +1,4 @@
-import { getPosts } from "./api.js";
+import { getPosts, getUserPosts } from "./api.js";
 import { renderAddPostPageComponent } from "./components/add-post-page-component.js";
 import { renderAuthPageComponent } from "./components/auth-page-component.js";
 import {
@@ -9,6 +9,7 @@ import {
   USER_POSTS_PAGE,
 } from "./routes.js";
 import { renderPostsPageComponent } from "./components/posts-page-component.js";
+import { renderUserPostsPageComponent } from "./components/post-user-page-component.js";
 import { renderLoadingPageComponent } from "./components/loading-page-component.js";
 import {
   getUserFromLocalStorage,
@@ -29,7 +30,7 @@ export const logout = () => {
   user = null;
   removeUserFromLocalStorage();
   goToPage(POSTS_PAGE);
-};
+}; 
 
 /**
  * Включает страницу приложения
@@ -67,16 +68,29 @@ export const goToPage = (newPage, data) => {
     }
 
     if (newPage === USER_POSTS_PAGE) {
-      // TODO: реализовать получение постов юзера из API
+      page = LOADING_PAGE;
+      renderApp();
+        // TODO: реализовать получение постов юзера из API
+        getUserPosts({
+          id: data.userId,
+          token: getToken()
+         })
+        .then((userPosts) => {
+          page = USER_POSTS_PAGE;
+          posts = userPosts;
+          renderApp();
+        })
+        .catch((error) => {
+          console.error(error);
+          goToPage(USER_POSTS_PAGE);
+        });
+      
       console.log("Открываю страницу пользователя: ", data.userId);
-      page = USER_POSTS_PAGE;
-      posts = [];
       return renderApp();
     }
 
     page = newPage;
     renderApp();
-
     return;
   }
 
@@ -107,27 +121,32 @@ const renderApp = () => {
   }
 
   if (page === ADD_POSTS_PAGE) {
-    return renderAddPostPageComponent({
-      appEl,
-      onAddPostClick({ description, imageUrl }) {
-        // TODO: реализовать добавление поста в API
-        console.log("Добавляю пост...", { description, imageUrl });
-        goToPage(POSTS_PAGE);
-      },
-    });
-  }
+    // TODO: реализовать добавление поста в API
+return renderAddPostPageComponent({
+appEl,
+token: getToken(),
+onAddPostClick({ description, imageUrl })
+{
+console.log("Добавляю пост...", { description, imageUrl });
+goToPage(POSTS_PAGE);
+},
+});
+}
 
-  if (page === POSTS_PAGE) {
-    return renderPostsPageComponent({
-      appEl,
-    });
-  }
+if (page === POSTS_PAGE) {
+  return renderPostsPageComponent({
+    appEl,
+    token: getToken()
+  });
+}
 
-  if (page === USER_POSTS_PAGE) {
-    // TODO: реализовать страницу фотографию пользвателя
-    appEl.innerHTML = "Здесь будет страница фотографий пользователя";
-    return;
-  }
+if (page === USER_POSTS_PAGE) {
+  //  TODO: реализовать страницу фотографию пользвателя
+  return renderUserPostsPageComponent({
+    appEl,
+    token: getToken()
+  })
+}
 };
 
 goToPage(POSTS_PAGE);
